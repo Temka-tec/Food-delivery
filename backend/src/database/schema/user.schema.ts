@@ -5,7 +5,8 @@ const userSchema = new Schema({
  email: {type: String, required: true, unique: true},
  password: {type: String, required: true},
  profileImage: {type: String, required: false},
- address: {type: String, required: false}
+ address: {type: String, required: false},
+role: {type: String, required: true, default: "customer"}
 }, {
     timestamps: true,
 });
