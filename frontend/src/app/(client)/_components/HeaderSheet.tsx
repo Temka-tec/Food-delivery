@@ -1,0 +1,264 @@
+"use client";
+
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  HandPlatter,
+  MapPin,
+  ShoppingCart,
+  User,
+  X,
+  Plus,
+  Minus,
+} from "lucide-react";
+
+export const HeaderSheet = () => {
+  const router = useRouter();
+
+  const isLoggedIn = false;
+
+  const [openAuthChoice, setOpenAuthChoice] = React.useState(false);
+  const [openSuccess, setOpenSuccess] = React.useState(false);
+
+  const handleCheckout = () => {
+    if (!isLoggedIn) {
+      setOpenAuthChoice(true);
+      return;
+    }
+
+    setOpenSuccess(true);
+  };
+
+  return (
+    <>
+      <footer className="text-gray-300">
+        <div className="w-full h-[70px] bg-black flex items-center justify-between px-8">
+          <div className="flex items-center gap-2">
+            <HandPlatter className="text-red-400 w-10 h-10" />
+            <div className="leading-tight">
+              <p className="text-white font-bold">
+                Nom<span className="text-red-500">Nom</span>
+              </p>
+              <p className="text-xs text-zinc-400">Swift delivery</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium">
+              <MapPin size={16} className="text-red-500" />
+              <span className="text-neutral-500">Delivery:</span>
+              <span>Add location</span>
+            </button>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="relative w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center py-5">
+                  <ShoppingCart size={18} />
+                </button>
+              </SheetTrigger>
+
+              <SheetContent
+                side="right"
+                className="w-[533px]! max-w-[533px]! bg-zinc-900 text-zinc-100 rounded-b-md px-6"
+              >
+                <SheetHeader className="mb-4">
+                  <SheetTitle className="flex items-center gap-2 text-white">
+                    <ShoppingCart className="h-5 w-5" />
+                    Order detail
+                  </SheetTitle>
+                </SheetHeader>
+
+                <Tabs defaultValue="cart">
+                  <TabsList className="grid grid-cols-2 mb-4 bg-white p-1 rounded-2xl w-120 h-10">
+                    <TabsTrigger
+                      value="cart"
+                      className="
+      rounded-2xl
+      data-[state=active]:bg-red-600
+      data-[state=active]:text-white
+    "
+                    >
+                      Cart
+                    </TabsTrigger>
+
+                    <TabsTrigger
+                      value="order"
+                      className="
+      rounded-2xl
+      data-[state=active]:bg-red-600
+      data-[state=active]:text-white
+    "
+                    >
+                      Order
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="space-y-4">
+                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                      <h3 className="font-semibold mb-3">My cart</h3>
+
+                      {[1, 2].map((i) => (
+                        <div key={i} className="space-y-3">
+                          <div className="flex gap-3">
+                            <img
+                              src="dish.png"
+                              alt="food"
+                              className="h-20 w-20 rounded-xl object-cover"
+                            />
+
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="font-semibold text-red-600">
+                                    Sunshine Stackers
+                                  </p>
+                                  <p className="text-sm text-zinc-600">
+                                    Fluffy pancakes with fruits and cream.
+                                  </p>
+                                </div>
+                                <button className="text-red-500">
+                                  <X size={16} />
+                                </button>
+                              </div>
+
+                              <div className="mt-2 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Button size="icon" variant="outline">
+                                    <Minus size={14} />
+                                  </Button>
+                                  <span className="font-medium">1</span>
+                                  <Button size="icon" variant="outline">
+                                    <Plus size={14} />
+                                  </Button>
+                                </div>
+                                <p className="font-semibold">$12.99</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {i === 1 && <Separator className="border-dashed" />}
+                        </div>
+                      ))}
+                    </Card>
+
+                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                      <h3 className="font-semibold mb-2">Delivery location</h3>
+                      <Input className="break-after-auto" />
+                    </Card>
+
+                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                      <h3 className="font-semibold mb-3">Payment info</h3>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Items</span>
+                          <span>$25.98</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Shipping</span>
+                          <span>$0.99</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between font-semibold">
+                          <span>Total</span>
+                          <span>$26.97</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleCheckout}
+                        className="w-full mt-4 rounded-full bg-red-600 hover:bg-red-700"
+                      >
+                        Checkout
+                      </Button>
+                    </Card>
+                  </div>
+                </Tabs>
+              </SheetContent>
+            </Sheet>
+
+            <button className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+              <User size={18} />
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      <Dialog open={openAuthChoice} onOpenChange={setOpenAuthChoice}>
+        <DialogContent className="max-w-md text-center">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              You need login first!!
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-zinc-500 mb-6">
+            Please login or create an account to place your order
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <Button
+              className="rounded-full bg-black hover:bg-gray-600"
+              onClick={() => {
+                setOpenAuthChoice(false);
+                router.push("/login");
+              }}
+            >
+              Login
+            </Button>
+
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                setOpenAuthChoice(false);
+                router.push("/Signup");
+              }}
+            >
+              Sign up
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openSuccess} onOpenChange={setOpenSuccess}>
+        <DialogContent className="max-w-md text-center">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              Your order has been successfully placed!
+            </DialogTitle>
+          </DialogHeader>
+
+          <img src="/success.png" alt="success" className="mx-auto my-4 h-40" />
+
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setOpenSuccess(false);
+              router.push("/");
+            }}
+          >
+            Back to home
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
