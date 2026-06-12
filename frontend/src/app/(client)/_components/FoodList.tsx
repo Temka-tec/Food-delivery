@@ -63,6 +63,7 @@ export const FoodList = () => {
                 {category.foods.map((food) => (
                   <FoodCard
                     key={food.id}
+                    id={food.id}
                     title={food.name}
                     price={`$${food.price}`}
                     desc={food.ingredients}

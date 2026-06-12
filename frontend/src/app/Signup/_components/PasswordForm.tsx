@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { api } from "@/lib/axios";
 
 const formSchema = z
   .object({
@@ -41,9 +42,11 @@ const formSchema = z
 
 export default function PasswordForm({
   email,
+  username,
   onBack,
 }: {
   email: string;
+  username: string;
   onBack: () => void;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,16 +58,13 @@ export default function PasswordForm({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({
-      email,
-      password: values.password,
-    });
-    // 👉 энд signup API дуудна
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await api.post("/auth/register", { username, email, password: values.password });
+    router.push("/login");
   }
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const router = useRouter();
 
   return (
     <div className="p-5 flex justify-center items-center gap-3">

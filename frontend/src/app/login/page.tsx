@@ -23,17 +23,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Snowfall from "react-snowfall";
+import { useAuth } from "@/context/AuthProvider";
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .min(3, "Хамгийн багадаа 3 тэмдэгт байх ёстой")
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email формат буруу"),
+  email: z.string().email("Email формат буруу"),
   password: z.string().min(3, "Хамгийн багадаа 3 тэмдэгт байх ёстой"),
 });
-
-const ADMIN_EMAIL = "admin@example.com";
-const ADMIN_PASSWORD = "admin123";
 
 export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,16 +40,16 @@ export default function LoginPage() {
   });
 
   const router = useRouter();
-
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (values.email === ADMIN_EMAIL && values.password === ADMIN_PASSWORD) {
-      localStorage.setItem("role", "admin");
-      router.push("/admin");
-    } else {
-      localStorage.setItem("role", "user");
-      router.push("/user");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setError("");
+      await login(values.email, values.password);
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? "Нэвтрэхэд алдаа гарлаа");
     }
   }
 
@@ -122,6 +117,9 @@ export default function LoginPage() {
                   )}
                 />
 
+                {error && (
+                  <p className="text-sm text-red-500 text-center">{error}</p>
+                )}
                 <Button type="submit" className="w-full">
                   Login
                 </Button>

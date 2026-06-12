@@ -4,13 +4,14 @@ import { useState } from "react";
 import FoodModal from "./FoodModal";
 
 type FoodCardProps = {
+  id: string;
   title: string;
   price: string;
   desc: string;
   image: string;
 };
 
-export const FoodCard = ({ title, price, desc, image }: FoodCardProps) => {
+export const FoodCard = ({ id, title, price, desc, image }: FoodCardProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,7 +39,16 @@ export const FoodCard = ({ title, price, desc, image }: FoodCardProps) => {
       </div>
 
       <p className="text-sm text-gray-600 line-clamp-2">{desc}</p>
-      {open && <FoodModal onClose={() => setOpen(false)} />}
+      {open && (
+        <FoodModal
+          id={id}
+          title={title}
+          price={price}
+          desc={desc}
+          image={image}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 };

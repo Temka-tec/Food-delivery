@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
+  username: z.string().min(3, "Хамгийн багадаа 3 тэмдэгт байх ёстой"),
   email: z
     .string()
     .min(10, "Хамгийн багадаа 10 тэмдэгт байх ёстой")
@@ -31,15 +32,15 @@ const formSchema = z.object({
 export default function EmailForm({
   onNext,
 }: {
-  onNext: (email: string) => void;
+  onNext: (email: string, username: string) => void;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "" },
+    defaultValues: { username: "", email: "" },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onNext(values.email); // 👉 дараагийн step
+    onNext(values.email, values.username);
   }
   const router = useRouter();
   return (
@@ -63,6 +64,20 @@ export default function EmailForm({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="email"

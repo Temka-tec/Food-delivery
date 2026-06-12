@@ -2,7 +2,6 @@
 
 import { api } from "@/lib/axios";
 import {
-  Children,
   createContext,
   useContext,
   PropsWithChildren,
@@ -13,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 type AuthContextType = {
   user: User | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (
     username: string,
     password: string,
@@ -34,17 +33,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     const { data } = await api.post("/auth/login", {
-      username,
+      email,
       password,
     });
 
-    const { user } = data;
+    const { user, accessToken } = data;
 
     setUser(user);
+    localStorage.setItem("token", accessToken);
 
-    router.push("/");
+    router.push(user.role === "admin" ? "/admin" : "/");
   };
 
   const register = async (

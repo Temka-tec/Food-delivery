@@ -3,9 +3,9 @@ import { prisma } from "../../database/index.ts";
 import jwt from "jsonwebtoken"
 
 export const login: RequestHandler = async ( req, res) => {
-    const { username, password} = req.body;
+    const { email, password} = req.body;
 
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) return res.status(404).json({ message: "User not found"});
 

@@ -29,11 +29,15 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthProvider";
+import { useCart } from "@/context/CartProvider";
 
 export const HeaderSheet = () => {
   const router = useRouter();
+  const { user } = useAuth();
+  const { items, removeItem, updateQuantity, total } = useCart();
 
-  const isLoggedIn = false;
+  const isLoggedIn = !!user;
 
   const [openAuthChoice, setOpenAuthChoice] = React.useState(false);
   const [openSuccess, setOpenSuccess] = React.useState(false);
@@ -62,141 +66,164 @@ export const HeaderSheet = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium">
-              <MapPin size={16} className="text-red-500" />
-              <span className="text-neutral-500">Delivery:</span>
-              <span>Add location</span>
-            </button>
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="relative w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center py-5">
-                  <ShoppingCart size={18} />
+            {isLoggedIn ? (
+              <>
+                <button className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium">
+                  <MapPin size={16} className="text-red-500" />
+                  <span className="text-neutral-500">Delivery:</span>
+                  <span>Add location</span>
                 </button>
-              </SheetTrigger>
 
-              <SheetContent
-                side="right"
-                className="w-[533px]! max-w-[533px]! bg-zinc-900 text-zinc-100 rounded-b-md px-6"
-              >
-                <SheetHeader className="mb-4">
-                  <SheetTitle className="flex items-center gap-2 text-white">
-                    <ShoppingCart className="h-5 w-5" />
-                    Order detail
-                  </SheetTitle>
-                </SheetHeader>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <button className="relative w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center py-5">
+                      <ShoppingCart size={18} />
+                    </button>
+                  </SheetTrigger>
 
-                <Tabs defaultValue="cart">
-                  <TabsList className="grid grid-cols-2 mb-4 bg-white p-1 rounded-2xl w-120 h-10">
-                    <TabsTrigger
-                      value="cart"
-                      className="
+                  <SheetContent
+                    side="right"
+                    className="w-[533px]! max-w-[533px]! bg-zinc-900 text-zinc-100 rounded-b-md px-6"
+                  >
+                    <SheetHeader className="mb-4">
+                      <SheetTitle className="flex items-center gap-2 text-white">
+                        <ShoppingCart className="h-5 w-5" />
+                        Order detail
+                      </SheetTitle>
+                    </SheetHeader>
+
+                    <Tabs defaultValue="cart">
+                      <TabsList className="grid grid-cols-2 mb-4 bg-white p-1 rounded-2xl w-120 h-10">
+                        <TabsTrigger
+                          value="cart"
+                          className="
       rounded-2xl
       data-[state=active]:bg-red-600
       data-[state=active]:text-white
     "
-                    >
-                      Cart
-                    </TabsTrigger>
+                        >
+                          Cart
+                        </TabsTrigger>
 
-                    <TabsTrigger
-                      value="order"
-                      className="
+                        <TabsTrigger
+                          value="order"
+                          className="
       rounded-2xl
       data-[state=active]:bg-red-600
       data-[state=active]:text-white
     "
-                    >
-                      Order
-                    </TabsTrigger>
-                  </TabsList>
-                  <div className="space-y-4">
-                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
-                      <h3 className="font-semibold mb-3">My cart</h3>
+                        >
+                          Order
+                        </TabsTrigger>
+                      </TabsList>
+                      <div className="space-y-4">
+                        <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                          <h3 className="font-semibold mb-3">My cart</h3>
 
-                      {[1, 2].map((i) => (
-                        <div key={i} className="space-y-3">
-                          <div className="flex gap-3">
-                            <img
-                              src="dish.png"
-                              alt="food"
-                              className="h-20 w-20 rounded-xl object-cover"
-                            />
+                          {items.length === 0 ? (
+                            <p className="text-sm text-zinc-400 text-center py-4">Сагс хоосон байна</p>
+                          ) : (
+                            items.map((item, i) => (
+                              <div key={item.id} className="space-y-3">
+                                <div className="flex gap-3">
+                                  <img
+                                    src={item.image}
+                                    alt={item.title}
+                                    className="h-20 w-20 rounded-xl object-cover"
+                                  />
 
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <p className="font-semibold text-red-600">
-                                    Sunshine Stackers
-                                  </p>
-                                  <p className="text-sm text-zinc-600">
-                                    Fluffy pancakes with fruits and cream.
-                                  </p>
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-semibold text-red-600">{item.title}</p>
+                                        <p className="text-sm text-zinc-600 line-clamp-1">{item.desc}</p>
+                                      </div>
+                                      <button className="text-red-500" onClick={() => removeItem(item.id)}>
+                                        <X size={16} />
+                                      </button>
+                                    </div>
+
+                                    <div className="mt-2 flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <Button size="icon" variant="outline" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                                          <Minus size={14} />
+                                        </Button>
+                                        <span className="font-medium">{item.quantity}</span>
+                                        <Button size="icon" variant="outline" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                                          <Plus size={14} />
+                                        </Button>
+                                      </div>
+                                      <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                                    </div>
+                                  </div>
                                 </div>
-                                <button className="text-red-500">
-                                  <X size={16} />
-                                </button>
-                              </div>
 
-                              <div className="mt-2 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Button size="icon" variant="outline">
-                                    <Minus size={14} />
-                                  </Button>
-                                  <span className="font-medium">1</span>
-                                  <Button size="icon" variant="outline">
-                                    <Plus size={14} />
-                                  </Button>
-                                </div>
-                                <p className="font-semibold">$12.99</p>
+                                {i < items.length - 1 && <Separator className="border-dashed" />}
                               </div>
+                            ))
+                          )}
+                        </Card>
+
+                        <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                          <h3 className="font-semibold mb-2">Delivery location</h3>
+                          <Input className="break-after-auto" />
+                        </Card>
+
+                        <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                          <h3 className="font-semibold mb-3">Payment info</h3>
+
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>Items</span>
+                              <span>${total.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Shipping</span>
+                              <span>$0.99</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between font-semibold">
+                              <span>Total</span>
+                              <span>${(total + 0.99).toFixed(2)}</span>
                             </div>
                           </div>
 
-                          {i === 1 && <Separator className="border-dashed" />}
-                        </div>
-                      ))}
-                    </Card>
-
-                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
-                      <h3 className="font-semibold mb-2">Delivery location</h3>
-                      <Input className="break-after-auto" />
-                    </Card>
-
-                    <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
-                      <h3 className="font-semibold mb-3">Payment info</h3>
-
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Items</span>
-                          <span>$25.98</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Shipping</span>
-                          <span>$0.99</span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between font-semibold">
-                          <span>Total</span>
-                          <span>$26.97</span>
-                        </div>
+                          <Button
+                            onClick={handleCheckout}
+                            className="w-full mt-4 rounded-full bg-red-600 hover:bg-red-700"
+                          >
+                            Checkout
+                          </Button>
+                        </Card>
                       </div>
+                    </Tabs>
+                  </SheetContent>
+                </Sheet>
 
-                      <Button
-                        onClick={handleCheckout}
-                        className="w-full mt-4 rounded-full bg-red-600 hover:bg-red-700"
-                      >
-                        Checkout
-                      </Button>
-                    </Card>
-                  </div>
-                </Tabs>
-              </SheetContent>
-            </Sheet>
-
-            <button className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-              <User size={18} />
-            </button>
+                <button
+                  onClick={() => router.push("/profile")}
+                  className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center"
+                >
+                  <User size={18} />
+                </button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="rounded-full border-white text-white bg-transparent hover:bg-white hover:text-black"
+                  onClick={() => router.push("/login")}
+                >
+                  Login
+                </Button>
+                <Button
+                  className="rounded-full bg-red-500 hover:bg-red-600 text-white"
+                  onClick={() => router.push("/Signup")}
+                >
+                  Sign up
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </footer>
