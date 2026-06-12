@@ -1,12 +1,12 @@
 import express from 'express';
-import { connectToDatabase } from './database/index.ts';
+import cors from 'cors';
 import { FoodRouter } from './routers/food.router.ts';
 import { CategoryRouter } from './routers/category.router.ts';
 import { AuthRouter } from './routers/auth.router.ts';
-await connectToDatabase();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.use('/foods', FoodRouter);

@@ -2,18 +2,18 @@
 
 import { Card } from "@/components/ui/card";
 import { CreateFoodDialog } from "./_components/CreateFood";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MenuCard } from "./_components/MenuCard";
 import { api } from "@/lib/axios";
 
 type Food = {
-  _id: string;
+  id: string;
   name: string;
   price: number;
   image: string;
   ingredients: string;
-  categoryIds: {
-    _id: string;
+  categories: {
+    id: string;
     name: string;
   }[];
 };
@@ -21,24 +21,24 @@ type Food = {
 export default function AdminPage() {
   const [foods, setFoods] = useState<Food[]>([]);
 
-  useEffect(() => {
-    const getData = async () => {
-      const { data } = await api.get<Food[]>("/foods");
-      setFoods(data);
-    };
-
-    getData();
+  const getData = useCallback(async () => {
+    const { data } = await api.get<Food[]>("/foods");
+    setFoods(data);
   }, []);
+
+  useEffect(() => {
+    getData();
+  }, [getData]);
 
   return (
     <main className="flex-1 p-8">
       <Card className="grid grid-cols-5 gap-4 p-6">
-        <CreateFoodDialog />
+        <CreateFoodDialog onCreated={getData} />
 
         {foods.map((food) => (
           <MenuCard
-            key={food._id}
-            id={food._id}
+            key={food.id}
+            id={food.id}
             name={food.name}
             price={food.price}
             ingredients={food.ingredients}

@@ -1,12 +1,13 @@
 import type { RequestHandler } from "express";
-import { CategoryModel } from "../../database/schema/category.schema.ts";
+import { prisma } from "../../database/index.ts";
 
 export const createCategory: RequestHandler = async (req, res) => {
     const body = req.body;
 
-    const category = await CategoryModel.create({
-        name: body.name,
-      
+    const category = await prisma.category.create({
+        data: {
+            name: body.name,
+        },
     });
     res.status(201).json(category);
 }

@@ -60,11 +60,15 @@ const foodFormSchema = z.object({
 type FoodFormValues = z.infer<typeof foodFormSchema>;
 
 type Category = {
-  _id: string;
+  id: string;
   name: string;
 };
 
-export const CreateFoodDialog = () => {
+type CreateFoodDialogProps = {
+  onCreated?: () => void;
+};
+
+export const CreateFoodDialog = ({ onCreated }: CreateFoodDialogProps) => {
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -136,6 +140,8 @@ export const CreateFoodDialog = () => {
 
     form.reset();
     setUploadedImageUrl("");
+    setOpen(false);
+    onCreated?.();
   };
 
   useEffect(() => {
@@ -145,7 +151,7 @@ export const CreateFoodDialog = () => {
         setCategories(data);
 
         if (data.length && !form.getValues("categoryId")) {
-          form.setValue("categoryId", data[0]._id, { shouldValidate: true });
+          form.setValue("categoryId", data[0].id, { shouldValidate: true });
         }
       } catch (err) {
         console.error("Failed to fetch categories", err);
@@ -231,8 +237,8 @@ export const CreateFoodDialog = () => {
                     <SelectContent>
                       {categories.map((category) => (
                         <SelectItem
-                          key={String(category._id)}
-                          value={String(category._id)}
+                          key={category.id}
+                          value={category.id}
                         >
                           {category.name}
                         </SelectItem>
