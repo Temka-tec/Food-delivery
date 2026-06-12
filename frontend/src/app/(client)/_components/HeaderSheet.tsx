@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -32,22 +32,49 @@ import {
 import { useAuth } from "@/context/AuthProvider";
 import { useCart } from "@/context/CartProvider";
 
+type Order = {
+  id: string;
+  total: number;
+  status: string;
+  address: string | null;
+  createdAt: string;
+  items: { id: string; quantity: number; food: { name: string } }[];
+};
+
 export const HeaderSheet = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const { items, removeItem, updateQuantity, total } = useCart();
+  const { items, removeItem, updateQuantity, total, clearCart } = useCart();
 
   const isLoggedIn = !!user;
 
   const [openAuthChoice, setOpenAuthChoice] = React.useState(false);
   const [openSuccess, setOpenSuccess] = React.useState(false);
+  const [address, setAddress] = React.useState("");
+  const [orders, setOrders] = React.useState<Order[]>([]);
 
-  const handleCheckout = () => {
+  const fetchOrders = async () => {
+    if (!user) return;
+    const { data } = await import("@/lib/axios").then((m) =>
+      m.api.get(`/orders/user/${user.id}`)
+    );
+    setOrders(data.orders);
+  };
+
+  const handleCheckout = async () => {
     if (!isLoggedIn) {
       setOpenAuthChoice(true);
       return;
     }
-
+    await import("@/lib/axios").then((m) =>
+      m.api.post("/orders", {
+        userId: user!.id,
+        address,
+        total: total + 0.99,
+        items: items.map((i) => ({ foodId: i.id, quantity: i.quantity, price: i.price })),
+      })
+    );
+    clearCart();
     setOpenSuccess(true);
   };
 
@@ -94,44 +121,24 @@ export const HeaderSheet = () => {
 
                     <Tabs defaultValue="cart">
                       <TabsList className="grid grid-cols-2 mb-4 bg-white p-1 rounded-2xl w-120 h-10">
-                        <TabsTrigger
-                          value="cart"
-                          className="
-      rounded-2xl
-      data-[state=active]:bg-red-600
-      data-[state=active]:text-white
-    "
-                        >
+                        <TabsTrigger value="cart" className="rounded-2xl data-[state=active]:bg-red-600 data-[state=active]:text-white">
                           Cart
                         </TabsTrigger>
-
-                        <TabsTrigger
-                          value="order"
-                          className="
-      rounded-2xl
-      data-[state=active]:bg-red-600
-      data-[state=active]:text-white
-    "
-                        >
+                        <TabsTrigger value="order" className="rounded-2xl data-[state=active]:bg-red-600 data-[state=active]:text-white" onClick={fetchOrders}>
                           Order
                         </TabsTrigger>
                       </TabsList>
-                      <div className="space-y-4">
+
+                      <TabsContent value="cart" className="space-y-4">
                         <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
                           <h3 className="font-semibold mb-3">My cart</h3>
-
                           {items.length === 0 ? (
                             <p className="text-sm text-zinc-400 text-center py-4">Сагс хоосон байна</p>
                           ) : (
                             items.map((item, i) => (
                               <div key={item.id} className="space-y-3">
                                 <div className="flex gap-3">
-                                  <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="h-20 w-20 rounded-xl object-cover"
-                                  />
-
+                                  <img src={item.image} alt={item.title} className="h-20 w-20 rounded-xl object-cover" />
                                   <div className="flex-1">
                                     <div className="flex items-start justify-between">
                                       <div>
@@ -142,7 +149,6 @@ export const HeaderSheet = () => {
                                         <X size={16} />
                                       </button>
                                     </div>
-
                                     <div className="mt-2 flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                         <Button size="icon" variant="outline" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
@@ -157,7 +163,6 @@ export const HeaderSheet = () => {
                                     </div>
                                   </div>
                                 </div>
-
                                 {i < items.length - 1 && <Separator className="border-dashed" />}
                               </div>
                             ))
@@ -166,12 +171,11 @@ export const HeaderSheet = () => {
 
                         <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
                           <h3 className="font-semibold mb-2">Delivery location</h3>
-                          <Input className="break-after-auto" />
+                          <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Хаяг оруулна уу" />
                         </Card>
 
                         <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
                           <h3 className="font-semibold mb-3">Payment info</h3>
-
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                               <span>Items</span>
@@ -187,15 +191,48 @@ export const HeaderSheet = () => {
                               <span>${(total + 0.99).toFixed(2)}</span>
                             </div>
                           </div>
-
-                          <Button
-                            onClick={handleCheckout}
-                            className="w-full mt-4 rounded-full bg-red-600 hover:bg-red-700"
-                          >
+                          <Button onClick={handleCheckout} className="w-full mt-4 rounded-full bg-red-600 hover:bg-red-700">
                             Checkout
                           </Button>
                         </Card>
-                      </div>
+                      </TabsContent>
+
+                      <TabsContent value="order">
+                        <Card className="bg-zinc-100 text-zinc-900 p-4 rounded-2xl">
+                          <h3 className="font-semibold mb-4">Order history</h3>
+                          {orders.length === 0 ? (
+                            <p className="text-sm text-zinc-400 text-center py-4">Захиалга байхгүй байна</p>
+                          ) : (
+                            orders.map((order, i) => (
+                              <div key={order.id}>
+                                <div className="space-y-2 py-3">
+                                  <div className="flex items-center justify-between">
+                                    <p className="font-bold text-base">
+                                      ${order.total.toFixed(2)}{" "}
+                                      <span className="text-zinc-500 font-normal text-sm">(#{order.id.slice(-5).toUpperCase()})</span>
+                                    </p>
+                                    <span className={`text-xs font-semibold border px-3 py-1 rounded-full ${order.status === "pending" ? "border-red-400 text-red-500" : "border-zinc-300 text-zinc-500"}`}>
+                                      {order.status === "pending" ? "Pending" : "Delivered"}
+                                    </span>
+                                  </div>
+                                  {order.items.map((oi) => (
+                                    <div key={oi.id} className="flex items-center gap-2 text-sm text-zinc-600">
+                                      <HandPlatter size={14} />
+                                      <span className="flex-1">{oi.food.name}</span>
+                                      <span>x {oi.quantity}</span>
+                                    </div>
+                                  ))}
+                                  <div className="flex items-center gap-2 text-sm text-zinc-400">
+                                    <MapPin size={14} />
+                                    <span className="line-clamp-1">{order.address ?? "Хаяг байхгүй"}</span>
+                                  </div>
+                                </div>
+                                {i < orders.length - 1 && <Separator className="border-dashed" />}
+                              </div>
+                            ))
+                          )}
+                        </Card>
+                      </TabsContent>
                     </Tabs>
                   </SheetContent>
                 </Sheet>
