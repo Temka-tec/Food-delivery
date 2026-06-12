@@ -66,9 +66,11 @@ type Category = {
 
 type CreateFoodDialogProps = {
   onCreated?: () => void;
+  defaultCategoryId?: string;
+  children?: React.ReactNode;
 };
 
-export const CreateFoodDialog = ({ onCreated }: CreateFoodDialogProps) => {
+export const CreateFoodDialog = ({ onCreated, defaultCategoryId, children }: CreateFoodDialogProps) => {
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -82,7 +84,7 @@ export const CreateFoodDialog = ({ onCreated }: CreateFoodDialogProps) => {
       price: "",
       ingredients: "",
       image: "",
-      categoryId: "",
+      categoryId: defaultCategoryId ?? "",
     },
   });
 
@@ -170,13 +172,17 @@ export const CreateFoodDialog = ({ onCreated }: CreateFoodDialogProps) => {
       }}
     >
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full h-full flex flex-col gap-4 items-center justify-center p-4"
-        >
-          <Plus />
-          Add New Dish
-        </Button>
+        {children ? (
+          <div>{children}</div>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full h-full flex flex-col gap-4 items-center justify-center p-4"
+          >
+            <Plus />
+            Add New Dish
+          </Button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="max-w-150">

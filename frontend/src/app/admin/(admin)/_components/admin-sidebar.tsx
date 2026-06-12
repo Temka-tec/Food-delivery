@@ -34,11 +34,11 @@ export function AdminSidebar() {
             Food menu
           </Button>
         </Link>
-        <Link href="/admin/orders">
+        <Link href="/admin/Order">
           <Button
             variant={pathname === "/admin/orders" ? "default" : "ghost"}
             className={
-              pathname === "/admin/orders"
+              pathname === "/admin/Order"
                 ? "w-full justify-start gap-2 bg-black text-white hover:bg-black/90"
                 : "w-full justify-start gap-2"
             }

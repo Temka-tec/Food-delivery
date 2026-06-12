@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     setUser(user);
     localStorage.setItem("token", accessToken);
+    localStorage.setItem("role", user.role);
 
     router.push(user.role === "admin" ? "/admin" : "/");
   };
