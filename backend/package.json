@@ -2,10 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node src/index.ts",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "build": "tsup src/index.ts --format esm --out-dir dist --no-splitting",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +29,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.2",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

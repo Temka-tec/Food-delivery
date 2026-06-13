@@ -12,10 +12,13 @@ app.use(express.json());
 
 app.use('/foods', FoodRouter);
 app.use('/categories', CategoryRouter);
-app.use("/auth", AuthRouter);
-app.use("/orders", OrderRouter);
+app.use('/auth', AuthRouter);
+app.use('/orders', OrderRouter);
 
+if (process.env['NODE_ENV'] !== 'production') {
+  app.listen(4000, () => {
+    console.log('Server running on port 4000');
+  });
+}
 
-app.listen(4000, () => {
-    console.log(`Exemple app listening on port 4000`)
-})
+export default app;

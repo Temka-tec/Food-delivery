@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { prisma } from "../../database/index.ts";
 
 export const updateOrderStatus: RequestHandler = async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { status } = req.body;
 
   const order = await prisma.order.update({

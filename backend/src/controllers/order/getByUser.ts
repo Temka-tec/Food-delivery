@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { prisma } from "../../database/index.ts";
 
 export const getOrdersByUser: RequestHandler = async (req, res) => {
-  const { userId } = req.params;
+  const userId = req.params.userId as string;
 
   const orders = await prisma.order.findMany({
     where: { userId },
