@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { prisma } from "../../database/index.ts";
 
 export const updateFood: RequestHandler = async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { name, price, ingredients, image, categoryIds } = req.body;
 
   const food = await prisma.food.update({
@@ -12,9 +12,9 @@ export const updateFood: RequestHandler = async (req, res) => {
       price: parseFloat(price),
       ingredients,
       image,
-      categories: categoryIds
-        ? { set: categoryIds.map((cid: string) => ({ id: cid })) }
-        : undefined,
+      ...(categoryIds && {
+        categories: { set: (categoryIds as string[]).map((cid) => ({ id: cid })) },
+      }),
     },
     include: { categories: true },
   });
