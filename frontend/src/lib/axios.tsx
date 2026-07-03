@@ -1,6 +1,7 @@
 import axios from "axios";
 
+// The Next.js rewrite maps /backend to the local Prisma-backed API routes.
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000",
+  baseURL: "/backend",
   headers: { "Content-Type": "application/json" },
 });

@@ -23,6 +23,8 @@ import { ArrowLeft } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/axios";
+import axios from "axios";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -58,11 +60,23 @@ export default function PasswordForm({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    await api.post("/auth/register", { username, email, password: values.password });
-    router.push("/login");
-  }
   const router = useRouter();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await api.post("/auth/register", {
+        username,
+        email,
+        password: values.password,
+      });
+      router.push("/login");
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message ?? "Registration failed"
+        : "Registration failed";
+
+      toast.error(message);
+    }
+  }
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 

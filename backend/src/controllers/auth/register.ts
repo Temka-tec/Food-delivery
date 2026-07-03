@@ -4,6 +4,10 @@ import { prisma } from "../../database/index.ts";
 export const register: RequestHandler = async ( req, res) => {
     const { username, password, email} = req.body;
 
+    if (!username || !password || !email) {
+        return res.status(400).json({ message: "Username, email, and password are required" });
+    }
+
     const isUsernameExist = await prisma.user.findUnique({ where: { username } });
 
     if (isUsernameExist) return res.status(400).json({message: "Username already exists"})
@@ -20,6 +24,8 @@ export const register: RequestHandler = async ( req, res) => {
         }
     })
 
-    res.status(200).json({ user})
+    const { password: _password, ...safeUser } = user;
+
+    res.status(201).json({ user: safeUser})
 
 }
