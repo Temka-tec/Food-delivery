@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@food.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "admin123";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
+
 type RouteContext = {
   params: Promise<{
     path?: string[];
@@ -184,6 +188,46 @@ async function handleAuth(request: Request, segments: string[]) {
     }
 
     try {
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        const existingAdmin =
+          (await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } })) ??
+          (await prisma.user.findUnique({ where: { username: ADMIN_USERNAME } }));
+
+        const adminUser = existingAdmin
+          ? await prisma.user.update({
+              where: { id: existingAdmin.id },
+              data:
+                existingAdmin.email === ADMIN_EMAIL
+                  ? {
+                      password: ADMIN_PASSWORD,
+                      role: "admin",
+                    }
+                  : {
+                      email: ADMIN_EMAIL,
+                      password: ADMIN_PASSWORD,
+                      role: "admin",
+                    },
+            })
+          : await prisma.user.create({
+              data: {
+                username: ADMIN_USERNAME,
+                email: ADMIN_EMAIL,
+                password: ADMIN_PASSWORD,
+                role: "admin",
+              },
+            });
+
+        const { password: _password, ...safeAdmin } = adminUser;
+
+        return json(
+          {
+            user: safeAdmin,
+            accessToken: randomUUID(),
+          },
+          200,
+        );
+      }
+
       const user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
@@ -214,6 +258,16 @@ async function handleAuth(request: Request, segments: string[]) {
 
     if (!username || !password || !email) {
       return json({ message: "Username, email, and password are required" }, 400);
+    }
+
+    if (email === ADMIN_EMAIL || username === ADMIN_USERNAME) {
+      return json(
+        {
+          message:
+            "This account is reserved for admin sign-in. Use the provided admin credentials instead of registering it.",
+        },
+        400,
+      );
     }
 
     try {

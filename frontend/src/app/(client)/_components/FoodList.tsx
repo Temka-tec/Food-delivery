@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FoodCard } from "./FoodCard";
 import { api } from "@/lib/axios";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Food = {
   id: string;
@@ -21,6 +22,7 @@ type Category = {
 
 export const FoodList = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const getData = async () => {
@@ -35,6 +37,13 @@ export const FoodList = () => {
     getData();
   }, []);
 
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories((current) => ({
+      ...current,
+      [categoryId]: !current[categoryId],
+    }));
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
       {categories
@@ -46,9 +55,24 @@ export const FoodList = () => {
                 <h2 className="text-white text-2xl font-semibold">
                   {category.name}
                 </h2>
-                <Button variant="ghost" className="text-white">
-                  See more
-                </Button>
+                {category.foods.length > 3 && (
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-white/10"
+                    onClick={() => toggleCategory(category.id)}
+                    aria-expanded={Boolean(expandedCategories[category.id])}
+                  >
+                    {expandedCategories[category.id] ? (
+                      <>
+                        See less <ChevronUp className="size-4" />
+                      </>
+                    ) : (
+                      <>
+                        See more <ChevronDown className="size-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
 
               <div
@@ -60,7 +84,10 @@ export const FoodList = () => {
                   gap-6
                 "
               >
-                {category.foods.map((food) => (
+                {(expandedCategories[category.id]
+                  ? category.foods
+                  : category.foods.slice(0, 3)
+                ).map((food) => (
                   <FoodCard
                     key={food.id}
                     id={food.id}

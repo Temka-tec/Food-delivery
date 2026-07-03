@@ -1,15 +1,17 @@
 "use client";
 import { Facebook, FacebookIcon, HandPlatter, Instagram } from "lucide-react";
 export const Footer = () => {
+  const marqueeItems = Array.from({ length: 10 }, () => "Fresh fast delivered");
+
   return (
     <footer className="bg-[#121212] text-gray-300">
       <div className="bg-red-500 py-4 overflow-hidden">
-        <div className="flex gap-12 whitespace-nowrap animate-marquee text-white font-semibold text-lg">
-          <span>Fresh fast delivered</span>
-          <span>Fresh fast delivered</span>
-          <span>Fresh fast delivered</span>
-          <span>Fresh fast delivered</span>
-          <span>Fresh fast delivered</span>
+        <div className="flex w-max min-w-full animate-marquee items-center gap-12 whitespace-nowrap text-lg font-semibold text-white">
+          {marqueeItems.map((text, index) => (
+            <span key={`${text}-${index}`} className="tracking-[0.25em] uppercase">
+              {text}
+            </span>
+          ))}
         </div>
       </div>
 
