@@ -27,11 +27,29 @@ type User = {
   role: string;
 };
 
+const USER_STORAGE_KEY = "user";
+const TOKEN_STORAGE_KEY = "token";
+const ROLE_STORAGE_KEY = "role";
+
 export const AuthContext = createContext({} as AuthContextType);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      if (typeof window === "undefined") {
+        return null;
+      }
+
+      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+      return storedUser ? (JSON.parse(storedUser) as User) : null;
+    } catch {
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(ROLE_STORAGE_KEY);
+      return null;
+    }
+  });
 
   const login = async (email: string, password: string) => {
     const { data } = await api.post("/auth/login", {
@@ -42,8 +60,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const { user, accessToken } = data;
 
     setUser(user);
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("role", user.role);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+    localStorage.setItem(ROLE_STORAGE_KEY, user.role);
 
     router.push(user.role === "admin" ? "/admin" : "/");
   };

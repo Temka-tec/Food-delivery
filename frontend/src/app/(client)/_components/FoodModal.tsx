@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartProvider";
+import { useAuth } from "@/context/AuthProvider";
+import { AuthRequiredDialog } from "./AuthRequiredDialog";
 
 type FoodModalProps = {
   id: string;
@@ -14,12 +16,19 @@ type FoodModalProps = {
 
 export default function FoodModal({ id, title, price, desc, image, onClose }: FoodModalProps) {
   const [quantity, setQuantity] = useState(1);
+  const [openAuthChoice, setOpenAuthChoice] = useState(false);
   const { addItem } = useCart();
+  const { user } = useAuth();
 
   const priceNum = parseFloat(price.replace("$", ""));
   const total = (priceNum * quantity).toFixed(2);
 
   const handleAddToCart = () => {
+    if (!user) {
+      setOpenAuthChoice(true);
+      return;
+    }
+
     for (let i = 0; i < quantity; i++) {
       addItem({ id, title, price: priceNum, desc, image });
     }
@@ -67,6 +76,11 @@ export default function FoodModal({ id, title, price, desc, image, onClose }: Fo
           </div>
         </div>
       </div>
+
+      <AuthRequiredDialog
+        open={openAuthChoice}
+        onOpenChange={setOpenAuthChoice}
+      />
     </div>
   );
 }

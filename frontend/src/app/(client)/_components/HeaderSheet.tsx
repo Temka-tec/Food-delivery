@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
 import { useCart } from "@/context/CartProvider";
+import { AuthRequiredDialog } from "./AuthRequiredDialog";
 
 type Order = {
   id: string;
@@ -265,42 +266,12 @@ export const HeaderSheet = () => {
         </div>
       </footer>
 
-      <Dialog open={openAuthChoice} onOpenChange={setOpenAuthChoice}>
-        <DialogContent className="max-w-md text-center">
-          <DialogHeader>
-            <DialogTitle className="text-xl">
-              You need login first!!
-            </DialogTitle>
-          </DialogHeader>
-
-          <p className="text-sm text-zinc-500 mb-6">
-            Please login or create an account to place your order
-          </p>
-
-          <div className="flex flex-col gap-3">
-            <Button
-              className="rounded-full bg-black hover:bg-gray-600"
-              onClick={() => {
-                setOpenAuthChoice(false);
-                router.push("/login");
-              }}
-            >
-              Login
-            </Button>
-
-            <Button
-              variant="outline"
-              className="rounded-full"
-              onClick={() => {
-                setOpenAuthChoice(false);
-                router.push("/Signup");
-              }}
-            >
-              Sign up
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AuthRequiredDialog
+        open={openAuthChoice}
+        onOpenChange={setOpenAuthChoice}
+        title="Та эхлээд нэвтрэх хэрэгтэй"
+        description="Нэвтэрч байж захиалга баталгаажуулах боломжтой."
+      />
 
       <Dialog open={openSuccess} onOpenChange={setOpenSuccess}>
         <DialogContent className="max-w-md text-center">
